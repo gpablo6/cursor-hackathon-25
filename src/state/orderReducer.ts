@@ -4,6 +4,8 @@ import type { Pupusa } from '../models/Pupusa';
 
 export type OrderAction =
   | { type: 'CREATE_GROUP'; payload: { groupName: string; peopleCount: number } }
+  | { type: 'UPDATE_GROUP'; payload: { groupName: string } }
+  | { type: 'ADD_PERSON' }
   | { type: 'RENAME_PERSON'; payload: { personId: string; newName: string } }
   | { type: 'ADD_PUPUSA'; payload: { personId: string; pupusa: Omit<Pupusa, 'id'> } }
   | { type: 'REMOVE_PUPUSA'; payload: { personId: string; pupusaId: string } }
@@ -25,6 +27,24 @@ export function orderReducer(state: GroupOrder | null, action: OrderAction): Gro
         groupName,
         people,
       };
+    }
+
+    case 'UPDATE_GROUP': {
+      if (!state) return state;
+      const { groupName } = action.payload;
+      return { ...state, groupName: groupName.trim() };
+    }
+
+    case 'ADD_PERSON': {
+      if (!state) return state;
+      if (state.people.length >= 20) return state;
+      const n = state.people.length + 1;
+      const newPerson: Person = {
+        id: `person-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        name: `Persona ${n}`,
+        pupusas: [],
+      };
+      return { ...state, people: [...state.people, newPerson] };
     }
 
     case 'RENAME_PERSON': {
