@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'pupas-v1';
+const CACHE_NAME = 'pupas-v2';
 const BASE = '/pupas/';
 
 self.addEventListener('install', (event) => {
@@ -12,6 +12,7 @@ self.addEventListener('install', (event) => {
       BASE + 'icon-192x192-maskable.png',
       BASE + 'icon-512x512.png',
       BASE + 'icon-512x512-maskable.png',
+      BASE + 'source-1024x1024.png',
     ])
     ).then(() => self.skipWaiting())
   );
