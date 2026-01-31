@@ -7,5 +7,8 @@ Quickstart
 - Format: uv run ruff format .
 - Type check: uv run mypy src
 
+Notes
+- Linting and type checks ignore `.agents/` (skills content).
+
 Logging
 - LOG_LEVEL controls log verbosity (default: INFO)
