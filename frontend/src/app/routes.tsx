@@ -3,6 +3,7 @@ import { GroupForm } from '../features/group/GroupForm'
 import { PersonList } from '../features/person/PersonList'
 import { KitchenSummary } from '../features/summary/KitchenSummary'
 import { Pupuseria } from '../pages/Pupuseria'
+import { LandingPage } from '../pages/landingpage2.0/LandingPage'
 
 function ErrorPage() {
   let error: any;
@@ -74,6 +75,11 @@ export const router = createBrowserRouter(
     {
       path: '/pupuseria',
       element: <Pupuseria />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: '/landing',
+      element: <LandingPage />,
       errorElement: <ErrorPage />,
     },
     {
