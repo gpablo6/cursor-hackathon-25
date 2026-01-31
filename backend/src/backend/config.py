@@ -12,13 +12,16 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_name: str = "Backend API"
+    app_name: str = "Pupas API"
     app_version: str = "0.1.0"
     debug: bool = False
 
     # Server
     host: str = "0.0.0.0"
     port: int = 8000
+
+    # Database
+    database_url: str = "sqlite:///./restaurant.db"
 
     # Logging
     log_level: str = "INFO"
