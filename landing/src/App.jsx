@@ -14,6 +14,10 @@ function App() {
         <p className="text-lg leading-relaxed text-zinc-600">
           Un SaaS para gestionar pedidos de pupusas en El Salvador.
         </p>
+        
+        <a href="" className="bg-[#f07a2a] text-white border border-zinc-300 px-4 py-2 mt-4 rounded-lg cursor-pointer">
+          Ver demo
+        </a>
       </main>
 
       <section className="py-16 px-8 max-w-5xl mx-auto">
