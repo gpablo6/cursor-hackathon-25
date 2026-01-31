@@ -4,6 +4,7 @@ import { MenuPupusas } from './components/MenuPupusas';
 import { OrderSummary } from './components/OrderSummary';
 import type { Order, OrderItem, MenuItemType } from '../../types/pupuseria';
 import { toast } from 'sonner';
+import { createOrder, completeOrder, getPendingOrders } from '../../services/ordersApi';
 
 // Complete menu from PUPAS - All pupusas and beverages
 const MENU_ITEMS: MenuItemType[] = [
@@ -108,6 +109,7 @@ export function WaiterView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'pupusa' | 'bebida' | 'all'>('all');
   const [globalNotes, setGlobalNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredMenu = MENU_ITEMS.filter(item => {
     const matchesSearch = item.nombre.toLowerCase().includes(searchQuery.toLowerCase());
@@ -191,7 +193,7 @@ export function WaiterView() {
     ));
   };
 
-  const sendToKitchen = () => {
+  const sendToKitchen = async () => {
     if (!selectedMesa) {
       toast.error('Selecciona una mesa primero');
       return;
@@ -201,62 +203,84 @@ export function WaiterView() {
       return;
     }
 
-    const total = orderItems.reduce((sum, item) => sum + (item.pupusa.precio * item.cantidad), 0);
-    // Apply global notes to all items
-    const itemsWithNotes = orderItems.map(item => ({
-      ...item,
-      notas: globalNotes || item.notas,
-    }));
-    const newOrder: Order = {
-      id: Date.now().toString(),
-      mesa: selectedMesa,
-      items: itemsWithNotes,
-      status: 'pendiente',
-      timestamp: new Date(),
-      total,
-    };
+    setIsSubmitting(true);
+    
+    try {
+      // Apply global notes to all items
+      const itemsWithNotes = orderItems.map(item => ({
+        ...item,
+        notas: globalNotes || item.notas,
+      }));
 
-    // Save to localStorage (in real app, this would be an API call)
-    const existingOrders = JSON.parse(localStorage.getItem('pupuseria-orders') || '[]');
-    existingOrders.push(newOrder);
-    localStorage.setItem('pupuseria-orders', JSON.stringify(existingOrders));
+      // Send order to backend API
+      const createdOrder = await createOrder(selectedMesa, itemsWithNotes);
 
-    const totalItems = orderItems.reduce((sum, item) => sum + item.cantidad, 0);
-    toast.success(`¡Pedido enviado! Mesa ${selectedMesa}`, {
-      description: `${totalItems} ${totalItems === 1 ? 'pupusa' : 'pupusas'}`,
-    });
+      // Keep localStorage in sync for occupancy/summary widgets
+      const storedOrders = JSON.parse(localStorage.getItem('pupuseria-orders') || '[]') as Order[];
+      const updatedStoredOrders = [
+        ...storedOrders.filter((order) => order.id !== createdOrder.id),
+        createdOrder,
+      ];
+      localStorage.setItem('pupuseria-orders', JSON.stringify(updatedStoredOrders));
+      window.dispatchEvent(new Event('storage'));
 
-    // Reset
-    setOrderItems([]);
-    setSelectedMesa(null);
-    setGlobalNotes('');
+      const totalItems = orderItems.reduce((sum, item) => sum + item.cantidad, 0);
+      toast.success(`¡Pedido enviado! Mesa ${selectedMesa}`, {
+        description: `${totalItems} ${totalItems === 1 ? 'item' : 'items'}`,
+      });
+
+      // Reset form
+      setOrderItems([]);
+      setSelectedMesa(null);
+      setGlobalNotes('');
+    } catch (error) {
+      console.error('Error sending order:', error);
+      toast.error('Error al enviar el pedido', {
+        description: error instanceof Error ? error.message : 'Intenta de nuevo',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const clearOrder = () => {
     setOrderItems([]);
   };
 
-  const payMesa = (mesa: number) => {
-    // Get all orders from localStorage
-    const stored = JSON.parse(localStorage.getItem('pupuseria-orders') || '[]') as Order[];
+  const payMesa = async (mesa: number) => {
+    try {
+      const pendingOrders = await getPendingOrders();
+      const mesaOrders = pendingOrders.filter((order) => order.mesa === mesa);
 
-    // Filter out all orders for this mesa (regardless of status)
-    const updatedStored = stored.filter((o) => o.mesa !== mesa);
-    localStorage.setItem('pupuseria-orders', JSON.stringify(updatedStored));
+      // Mark all orders for this mesa as completed in the backend
+      await Promise.all(
+        mesaOrders.map((order) => completeOrder(order.id))
+      );
 
-    // Trigger a storage event to notify other components
-    window.dispatchEvent(new Event('storage'));
+      // Clear from localStorage
+      const storedOrders = JSON.parse(localStorage.getItem('pupuseria-orders') || '[]') as Order[];
+      const updatedStored = storedOrders.filter((o) => o.mesa !== mesa);
+      localStorage.setItem('pupuseria-orders', JSON.stringify(updatedStored));
 
-    // If this mesa was selected, clear the selection
-    if (selectedMesa === mesa) {
-      setSelectedMesa(null);
-      setOrderItems([]);
+      // Trigger a storage event to notify other components
+      window.dispatchEvent(new Event('storage'));
+
+      // If this mesa was selected, clear the selection
+      if (selectedMesa === mesa) {
+        setSelectedMesa(null);
+        setOrderItems([]);
+      }
+
+      // Show toast notification
+      toast.success('¡Mesa pagada!', {
+        description: `Mesa ${mesa} liberada`,
+      });
+    } catch (error) {
+      console.error('Error paying mesa:', error);
+      toast.error('Error al procesar el pago', {
+        description: error instanceof Error ? error.message : 'Intenta de nuevo',
+      });
     }
-
-    // Show toast notification
-    toast.success('¡Mesa pagada!', {
-      description: `Mesa ${mesa} liberada`,
-    });
   };
 
   const total = orderItems.reduce((sum, item) => sum + (item.pupusa.precio * item.cantidad), 0);
@@ -300,6 +324,7 @@ export function WaiterView() {
             onClearOrder={clearOrder}
             globalNotes={globalNotes}
             onGlobalNotesChange={setGlobalNotes}
+            isSubmitting={isSubmitting}
           />
         </div>
       </div>

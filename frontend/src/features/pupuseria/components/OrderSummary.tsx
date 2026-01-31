@@ -14,6 +14,7 @@ interface OrderSummaryProps {
   onClearOrder?: () => void;
   globalNotes?: string;
   onGlobalNotesChange?: (notes: string) => void;
+  isSubmitting?: boolean;
 }
 
 export function OrderSummary({
@@ -25,6 +26,7 @@ export function OrderSummary({
   onClearOrder,
   globalNotes = '',
   onGlobalNotesChange,
+  isSubmitting = false,
 }: OrderSummaryProps) {
   const [showClearModal, setShowClearModal] = useState(false);
 
@@ -128,11 +130,20 @@ export function OrderSummary({
 
           <button
             onClick={onSendToKitchen}
-            disabled={!selectedMesa || orderItems.length === 0}
+            disabled={!selectedMesa || orderItems.length === 0 || isSubmitting}
             className="btn-3d-primary w-full flex items-center justify-center gap-2 py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           >
-            <Send className="w-4 h-4" />
-            Enviar a Cocina
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Enviar a Cocina
+              </>
+            )}
           </button>
         </div>
       )}
