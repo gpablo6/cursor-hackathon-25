@@ -96,7 +96,7 @@ Frontend will be available at: http://localhost:5173
 │   ├── .env                          # Environment variables
 │   └── package.json                  # Node dependencies
 │
-└── INTEGRATION.md        # Integration documentation
+└── docs/architecture-and-integration.md  # Architecture and integration
 ```
 
 ## API Endpoints
@@ -114,11 +114,10 @@ For detailed API documentation, visit http://localhost:8000/docs when the backen
 
 ## Integration Details
 
-The frontend and backend communicate via REST API. See [INTEGRATION.md](./INTEGRATION.md) for detailed information about:
+The frontend and backend communicate via REST API. See [docs/architecture-and-integration.md](./docs/architecture-and-integration.md) for details on:
 - Data transformation between frontend and backend
 - Order workflow and status mapping
-- Error handling and retry logic
-- Polling mechanism for real-time updates
+- API endpoints and polling behavior
 
 ## Development
 
@@ -217,7 +216,7 @@ VITE_API_URL=http://localhost:8000
 
 ## Troubleshooting
 
-See [INTEGRATION.md](./INTEGRATION.md) for detailed troubleshooting steps.
+See [docs/architecture-and-integration.md](./docs/architecture-and-integration.md) for integration troubleshooting tips.
 
 ### Common Issues
 
@@ -246,25 +245,16 @@ MIT
 4. Run tests and linters
 5. Submit a pull request
 
-## Docker & Deployment
+## Documentation
 
-### Documentation Index
-
-- **[🚀 Quick Start (Docker)](./QUICKSTART_DOCKER.md)** - Get running with Docker in 5 minutes
-- **[📖 Complete Deployment Guide](./DEPLOYMENT.md)** - Step-by-step Railway deployment
-- **[🐳 Docker Technical Guide](./DOCKER.md)** - Detailed Docker documentation
-- **[📋 Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)** - Verification checklist
-- **[📚 Documentation Index](./DOCKER_INDEX.md)** - Complete documentation navigation
-
-### Quick Links
-
+- **Deployment and Docker**: [docs/deployment.md](./docs/deployment.md)
+- **Architecture and Integration**: [docs/architecture-and-integration.md](./docs/architecture-and-integration.md)
+- **Docs consolidation plan**: [docs/documentation-consolidation.md](./docs/documentation-consolidation.md)
 - **Utility Scripts**: [scripts/README.md](./scripts/README.md)
-- **Deployment Summary**: [DOCKER_DEPLOYMENT_SUMMARY.md](./DOCKER_DEPLOYMENT_SUMMARY.md)
-- **CI/CD Workflow**: [.github/workflows/docker-build.yml](./.github/workflows/docker-build.yml)
 
 ## Deployment
 
-For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md) or use the [Documentation Index](./DOCKER_INDEX.md).
+For detailed deployment instructions, see [docs/deployment.md](./docs/deployment.md).
 
 ### Quick Deploy to Railway
 
@@ -285,7 +275,7 @@ For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md) or us
    - Update backend `CORS_ORIGINS` with frontend URL
    - Redeploy backend
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete step-by-step guide.
+See [docs/deployment.md](./docs/deployment.md) for complete step-by-step guide.
 
 ### Docker Deployment
 
