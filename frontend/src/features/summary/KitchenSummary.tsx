@@ -8,6 +8,9 @@ import { Button } from '../../shared/components/Button';
 import { SummaryTotals } from './SummaryTotals';
 import { SummaryList } from './SummaryList';
 import { Card } from '../../shared/components/Card';
+import { QRModal } from './QRModal';
+import type { Order, OrderItem, MenuItemType } from '../../types/pupuseria';
+import { toast } from 'sonner';
 
 interface AggregatedPupusa {
   dough: DoughType;
@@ -135,6 +138,8 @@ export function KitchenSummary() {
   }, [order]);
 
   const [tipPercent, setTipPercent] = useState(0);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrData, setQrData] = useState('');
   const tipAmount = subtotal * (tipPercent / 100);
   const totalWithTip = subtotal + tipAmount;
 
@@ -152,6 +157,268 @@ export function KitchenSummary() {
 
   const handleBack = () => {
     navigate('/order');
+  };
+
+  // Generate QR data (same format as WhatsApp message)
+  const generateQRData = (): string => {
+    let message = `*${order.groupName}*\n`;
+    message += `👨‍🍳 *Resumen para Cocina*\n\n`;
+    
+    message += `*Detalle del Pedido:*\n`;
+    if (aggregatedPupusas.length === 0 && aggregatedBeverages.length === 0) {
+      message += `No hay ítems en el pedido\n`;
+    } else {
+      aggregatedPupusas.forEach((item) => {
+        const emojiMap: Record<Filling, string> = {
+          frijol: '🫘',
+          revueltas: '🥓',
+          queso: '🧀',
+          jalapeno: '🌶️',
+          chicharron: '🐷',
+          cochinito: '🍃',
+          chorizo: '🌭',
+          loroco: '🌸',
+          papelillo: '🍃',
+          mora: '🌿',
+          mango: '🥭',
+          camaron: '🦐',
+          pescado: '🐟',
+          ajo: '🧄',
+          jamon: '🍖',
+          pepperoni: '🍕',
+          hongo: '🍄',
+          loca: '🎲',
+          pollo: '🐔',
+          carne: '🥩',
+          ayote: '🎃',
+          pina: '🍍',
+          jocote: '🍑',
+          garrobo: '🦎',
+          cusuco: '🦔',
+          conejo: '🐰',
+        };
+        const emoji = emojiMap[item.filling] || '🫓';
+        const doughName = getDoughDisplayName(item.dough);
+        const fillingName = getFillingDisplayName(item.filling, item.withCheese);
+        const sizeName = getSizeDisplayName(item.size);
+        message += `${emoji} ${item.quantity} de ${fillingName} de ${doughName} (${sizeName})\n`;
+      });
+      aggregatedBeverages.forEach((item) => {
+        message += `🥤 ${item.quantity} ${item.name}\n`;
+      });
+    }
+    message += `\n`;
+    message += `*Subtotal:* $${subtotal.toFixed(2)}\n`;
+    if (tipPercent > 0) {
+      message += `*Propina (${tipPercent}%):* $${tipAmount.toFixed(2)}\n`;
+      message += `*Total:* $${totalWithTip.toFixed(2)}\n`;
+    } else {
+      message += `*Total:* $${subtotal.toFixed(2)}\n`;
+    }
+    return message;
+  };
+
+  // Convert GroupOrder to pupusería Order format
+  const convertToPupuseriaOrder = (): Order => {
+    const items: OrderItem[] = [];
+
+    // Full menu items from pupusería system
+    const menuItems: MenuItemType[] = [
+      // Pupusas (26 items)
+      { id: 'p1', nombre: 'Frijol', precio: 1.00, emoji: '🫘', categoria: 'pupusa' },
+      { id: 'p2', nombre: 'Revueltas', precio: 1.25, emoji: '🥓', categoria: 'pupusa' },
+      { id: 'p3', nombre: 'Queso', precio: 1.00, emoji: '🧀', categoria: 'pupusa' },
+      { id: 'p4', nombre: 'Jalapeño', precio: 1.50, emoji: '🌶️', categoria: 'pupusa' },
+      { id: 'p5', nombre: 'Chicharrón', precio: 1.25, emoji: '🐷', categoria: 'pupusa' },
+      { id: 'p6', nombre: 'Cochinito', precio: 1.25, emoji: '🐖', categoria: 'pupusa' },
+      { id: 'p7', nombre: 'Chorizo', precio: 1.25, emoji: '🌭', categoria: 'pupusa' },
+      { id: 'p8', nombre: 'Loroco', precio: 1.50, emoji: '🌸', categoria: 'pupusa' },
+      { id: 'p9', nombre: 'Papelillo', precio: 1.50, emoji: '🌿', categoria: 'pupusa' },
+      { id: 'p10', nombre: 'Mora', precio: 1.50, emoji: '🫐', categoria: 'pupusa' },
+      { id: 'p11', nombre: 'Mango', precio: 1.50, emoji: '🥭', categoria: 'pupusa' },
+      { id: 'p12', nombre: 'Camarón', precio: 1.75, emoji: '🦐', categoria: 'pupusa' },
+      { id: 'p13', nombre: 'Pescado', precio: 1.75, emoji: '🐟', categoria: 'pupusa' },
+      { id: 'p14', nombre: 'Ajo', precio: 1.25, emoji: '🧄', categoria: 'pupusa' },
+      { id: 'p15', nombre: 'Jamón', precio: 1.25, emoji: '🍖', categoria: 'pupusa' },
+      { id: 'p16', nombre: 'Pepperoni', precio: 1.50, emoji: '🍕', categoria: 'pupusa' },
+      { id: 'p17', nombre: 'Hongo / Champiñón', precio: 1.50, emoji: '🍄', categoria: 'pupusa' },
+      { id: 'p18', nombre: 'Loca', precio: 1.25, emoji: '🌮', categoria: 'pupusa' },
+      { id: 'p19', nombre: 'Pollo', precio: 1.25, emoji: '🍗', categoria: 'pupusa' },
+      { id: 'p20', nombre: 'Carne', precio: 1.25, emoji: '🥩', categoria: 'pupusa' },
+      { id: 'p21', nombre: 'Ayote', precio: 1.25, emoji: '🎃', categoria: 'pupusa' },
+      { id: 'p22', nombre: 'Piña', precio: 1.50, emoji: '🍍', categoria: 'pupusa' },
+      { id: 'p23', nombre: 'Jocote', precio: 1.50, emoji: '🍑', categoria: 'pupusa' },
+      { id: 'p24', nombre: 'Garrobo', precio: 1.75, emoji: '🦎', categoria: 'pupusa' },
+      { id: 'p25', nombre: 'Cusuco', precio: 1.75, emoji: '🦔', categoria: 'pupusa' },
+      { id: 'p26', nombre: 'Conejo', precio: 1.75, emoji: '🐰', categoria: 'pupusa' },
+      
+      // Bebidas - Sodas (11 items)
+      { id: 'b1', nombre: 'Coca-Cola', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b2', nombre: 'Coca-Cola Light', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b3', nombre: 'Pepsi', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b4', nombre: 'Mirinda', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b5', nombre: 'Fanta Naranja', precio: 1.50, emoji: '🧃', categoria: 'bebida' },
+      { id: 'b6', nombre: 'Fresca', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b7', nombre: 'Sprite', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b8', nombre: '7Up', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b9', nombre: 'Kolashampan', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b10', nombre: 'Tropical', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      { id: 'b11', nombre: 'Canada Dry', precio: 1.50, emoji: '🥤', categoria: 'bebida' },
+      
+      // Bebidas - Cervezas (8 items)
+      { id: 'b12', nombre: 'Pilsener', precio: 2.00, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b13', nombre: 'Suprema', precio: 2.00, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b14', nombre: 'Golden', precio: 2.00, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b15', nombre: 'Regia', precio: 2.00, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b16', nombre: 'Corona', precio: 2.50, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b17', nombre: 'Modelo Especial', precio: 2.50, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b18', nombre: 'Budweiser', precio: 2.00, emoji: '🍺', categoria: 'bebida' },
+      { id: 'b19', nombre: 'Michelob Ultra', precio: 2.50, emoji: '🍺', categoria: 'bebida' },
+
+      // Bebidas - Jugos naturales (9 items)
+      { id: 'b20', nombre: 'Jugo de naranja', precio: 1.75, emoji: '🍊', categoria: 'bebida' },
+      { id: 'b21', nombre: 'Jugo de piña', precio: 1.75, emoji: '🍍', categoria: 'bebida' },
+      { id: 'b22', nombre: 'Jugo de mora', precio: 1.75, emoji: '🫐', categoria: 'bebida' },
+      { id: 'b23', nombre: 'Jugo de tamarindo', precio: 1.75, emoji: '🍹', categoria: 'bebida' },
+      { id: 'b24', nombre: 'Jugo de maracuyá', precio: 1.75, emoji: '🍹', categoria: 'bebida' },
+      { id: 'b25', nombre: 'Jugo de mango', precio: 1.75, emoji: '🥭', categoria: 'bebida' },
+      { id: 'b26', nombre: 'Jugo de guayaba', precio: 1.75, emoji: '🍈', categoria: 'bebida' },
+      { id: 'b27', nombre: 'Jugo de fresa', precio: 1.75, emoji: '🍓', categoria: 'bebida' },
+      { id: 'b28', nombre: 'Jugo de limón', precio: 1.50, emoji: '🍋', categoria: 'bebida' },
+
+      // Bebidas - Tradicionales (7 items)
+      { id: 'b29', nombre: 'Horchata', precio: 1.50, emoji: '🥛', categoria: 'bebida' },
+      { id: 'b30', nombre: 'Ensalada', precio: 1.50, emoji: '🥗', categoria: 'bebida' },
+      { id: 'b31', nombre: 'Cebada', precio: 1.25, emoji: '🌾', categoria: 'bebida' },
+      { id: 'b32', nombre: 'Tamarindo', precio: 1.25, emoji: '🍹', categoria: 'bebida' },
+      { id: 'b33', nombre: 'Jamaica', precio: 1.25, emoji: '🌺', categoria: 'bebida' },
+      { id: 'b34', nombre: 'Chan', precio: 1.25, emoji: '🍷', categoria: 'bebida' },
+      { id: 'b35', nombre: 'Arrayán', precio: 1.50, emoji: '🌳', categoria: 'bebida' },
+
+      // Bebidas - Licuados (8 items)
+      { id: 'b36', nombre: 'Licuado de banano', precio: 2.00, emoji: '🍌', categoria: 'bebida' },
+      { id: 'b37', nombre: 'Licuado de fresa', precio: 2.00, emoji: '🍓', categoria: 'bebida' },
+      { id: 'b38', nombre: 'Licuado de papaya', precio: 2.00, emoji: '🥭', categoria: 'bebida' },
+      { id: 'b39', nombre: 'Licuado de mango', precio: 2.00, emoji: '🥭', categoria: 'bebida' },
+      { id: 'b40', nombre: 'Licuado de piña', precio: 2.00, emoji: '🍍', categoria: 'bebida' },
+      { id: 'b41', nombre: 'Licuado de zapote', precio: 2.00, emoji: '🥑', categoria: 'bebida' },
+      { id: 'b42', nombre: 'Licuado de guineo con avena', precio: 2.00, emoji: '🍌', categoria: 'bebida' },
+      { id: 'b43', nombre: 'Licuado de chocolate', precio: 2.00, emoji: '🍫', categoria: 'bebida' },
+
+      // Bebidas - Bebidas calientes (6 items)
+      { id: 'b44', nombre: 'Café negro', precio: 1.00, emoji: '☕', categoria: 'bebida' },
+      { id: 'b45', nombre: 'Café con leche', precio: 1.25, emoji: '🥛', categoria: 'bebida' },
+      { id: 'b46', nombre: 'Chocolate caliente', precio: 1.50, emoji: '🍫', categoria: 'bebida' },
+      { id: 'b47', nombre: 'Atole de elote', precio: 1.50, emoji: '🌽', categoria: 'bebida' },
+      { id: 'b48', nombre: 'Atole de piña', precio: 1.50, emoji: '🍍', categoria: 'bebida' },
+      { id: 'b49', nombre: 'Atole de maíz tostado', precio: 1.50, emoji: '🌽', categoria: 'bebida' },
+
+      // Bebidas - Agua (3 items)
+      { id: 'b50', nombre: 'Agua pura', precio: 0.75, emoji: '💧', categoria: 'bebida' },
+      { id: 'b51', nombre: 'Agua embotellada', precio: 1.00, emoji: '💧', categoria: 'bebida' },
+      { id: 'b52', nombre: 'Agua con gas', precio: 1.25, emoji: '🍾', categoria: 'bebida' },
+    ];
+
+    // Helper to find menu item by name (handles "con queso" variants)
+    const findMenuItem = (name: string, categoria: 'pupusa' | 'bebida'): MenuItemType | null => {
+      // For pupusas, remove "con queso" suffix and match base name
+      if (categoria === 'pupusa') {
+        const baseName = name.replace(/\s+con queso$/i, '').trim();
+        return menuItems.find(item => item.nombre === baseName && item.categoria === categoria) || null;
+      }
+      // For beverages, match exact name
+      return menuItems.find(item => item.nombre === name && item.categoria === categoria) || null;
+    };
+
+    // Convert pupusas
+    order.people.forEach(person => {
+      person.pupusas.forEach(pupusa => {
+        const fillingName = getFillingDisplayName(pupusa.filling, pupusa.withCheese);
+        const menuItem = findMenuItem(fillingName, 'pupusa');
+        if (menuItem) {
+          items.push({
+            id: `${pupusa.id}-${Date.now()}`,
+            pupusa: menuItem,
+            cantidad: pupusa.quantity,
+            notas: `${getDoughDisplayName(pupusa.dough)} - ${getSizeDisplayName(pupusa.size)}`,
+          });
+        }
+      });
+    });
+
+    // Convert beverages
+    order.people.forEach(person => {
+      person.beverages.forEach(beverage => {
+        const menuItem = findMenuItem(beverage.name, 'bebida');
+        if (menuItem) {
+          items.push({
+            id: `${beverage.id}-${Date.now()}`,
+            pupusa: menuItem,
+            cantidad: beverage.quantity,
+            notas: '',
+          });
+        }
+      });
+    });
+
+    // Aggregate items by menu item
+    const aggregated = new Map<string, OrderItem>();
+    items.forEach(item => {
+      const key = item.pupusa.id;
+      const existing = aggregated.get(key);
+      if (existing) {
+        existing.cantidad += item.cantidad;
+        if (item.notas && !existing.notas.includes(item.notas)) {
+          existing.notas = existing.notas ? `${existing.notas}, ${item.notas}` : item.notas;
+        }
+      } else {
+        aggregated.set(key, { ...item });
+      }
+    });
+
+    const total = Array.from(aggregated.values()).reduce(
+      (sum, item) => sum + (item.pupusa.precio * item.cantidad),
+      0
+    );
+
+    return {
+      id: `group-${order.groupName}-${Date.now()}`,
+      mesa: 0, // Mesa 0 = pedido del sistema principal
+      items: Array.from(aggregated.values()),
+      status: 'pendiente',
+      timestamp: new Date(),
+      total,
+    };
+  };
+
+  const handleGenerateQR = () => {
+    const data = generateQRData();
+    setQrData(data);
+    setShowQRModal(true);
+  };
+
+  const handleSendToKitchen = () => {
+    try {
+      const pupuseriaOrder = convertToPupuseriaOrder();
+      
+      if (pupuseriaOrder.items.length === 0) {
+        toast.error('No hay items en el pedido para enviar');
+        return;
+      }
+
+      // Save to localStorage (same as WaiterView)
+      const existingOrders: Order[] = JSON.parse(localStorage.getItem('pupuseria-orders') || '[]');
+      existingOrders.push(pupuseriaOrder);
+      localStorage.setItem('pupuseria-orders', JSON.stringify(existingOrders));
+      window.dispatchEvent(new Event('storage')); // Notify other components
+
+      toast.success('¡Pedido enviado a cocina!', {
+        description: `${pupuseriaOrder.items.length} ${pupuseriaOrder.items.length === 1 ? 'item' : 'items'} - ${order.groupName}`,
+      });
+    } catch (error) {
+      toast.error('Error al enviar el pedido a cocina');
+      console.error(error);
+    }
   };
 
   const handleSendToWhatsApp = () => {
@@ -355,8 +622,8 @@ export function KitchenSummary() {
             </div>
           </Card>
 
-          {/* Action Button */}
-          <div className="pt-2">
+          {/* Action Buttons */}
+          <div className="pt-2 space-y-3">
             <Button
               type="button"
               variant="success"
@@ -366,7 +633,37 @@ export function KitchenSummary() {
               <span>📱</span>
               <span>Enviar a WhatsApp</span>
             </Button>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleGenerateQR}
+                className="w-full px-4 py-3 flex items-center justify-center gap-2"
+              >
+                <span>📱</span>
+                <span>Generar QR</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="success"
+                onClick={handleSendToKitchen}
+                className="w-full px-4 py-3 flex items-center justify-center gap-2"
+              >
+                <span>👨‍🍳</span>
+                <span>Enviar a Cocina</span>
+              </Button>
+            </div>
           </div>
+
+          {/* QR Modal */}
+          <QRModal
+            isOpen={showQRModal}
+            onClose={() => setShowQRModal(false)}
+            qrData={qrData}
+            title="Código QR del Pedido"
+          />
 
           {/* Support section - después del resumen, opcional y discreto */}
           <div className="pt-8 pb-2 text-center">

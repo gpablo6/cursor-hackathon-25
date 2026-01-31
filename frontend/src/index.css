@@ -88,4 +88,160 @@ body {
     @apply w-7 h-7 rounded-full border-2 border-white bg-action-green cursor-pointer transition-transform active:scale-95;
     box-shadow: 0 2px 8px rgba(45, 117, 80, 0.4);
   }
+
+  /* Pupuseria Buttons - Minimalist Duolingo Style */
+  .btn-3d-primary {
+    @apply font-bold text-white px-6 py-4 rounded-xl transition-all duration-200;
+    background: #F4C430;
+    box-shadow: 0 4px 0 0 #D4A520;
+  }
+  .btn-3d-primary:hover {
+    background: #E5B520;
+  }
+  .btn-3d-primary:active {
+    box-shadow: 0 2px 0 0 #D4A520;
+    transform: translateY(2px);
+  }
+
+  .btn-3d-success {
+    @apply font-bold text-white px-6 py-4 rounded-xl transition-all duration-200;
+    background: #4CAF50;
+    box-shadow: 0 4px 0 0 #2d7550;
+  }
+  .btn-3d-success:hover {
+    background: #45A049;
+  }
+  .btn-3d-success:active {
+    box-shadow: 0 2px 0 0 #2d7550;
+    transform: translateY(2px);
+  }
+
+  .btn-3d-danger {
+    @apply font-bold text-white px-6 py-4 rounded-xl transition-all duration-200;
+    background: #E53935;
+    box-shadow: 0 4px 0 0 #C12727;
+  }
+  .btn-3d-danger:hover {
+    background: #D32F2F;
+  }
+  .btn-3d-danger:active {
+    box-shadow: 0 2px 0 0 #C12727;
+    transform: translateY(2px);
+  }
+
+  /* Small Buttons - Minimalist */
+  .btn-3d-small-danger {
+    @apply font-bold text-white rounded-lg transition-all duration-200;
+    background: #E53935;
+    box-shadow: 0 3px 0 0 #C12727;
+  }
+  .btn-3d-small-danger:hover {
+    background: #D32F2F;
+  }
+  .btn-3d-small-danger:active {
+    box-shadow: 0 1px 0 0 #C12727;
+    transform: translateY(2px);
+  }
+
+  .btn-3d-small-success {
+    @apply font-bold text-white rounded-lg transition-all duration-200;
+    background: #4CAF50;
+    box-shadow: 0 3px 0 0 #2d7550;
+  }
+  .btn-3d-small-success:hover {
+    background: #45A049;
+  }
+  .btn-3d-small-success:active {
+    box-shadow: 0 1px 0 0 #2d7550;
+    transform: translateY(2px);
+  }
+
+  /* Tab buttons - Minimalist */
+  .btn-tab-3d {
+    @apply px-6 py-3 rounded-lg font-bold transition-all duration-200 flex items-center gap-2;
+  }
+  .btn-tab-3d-active {
+    @apply bg-pupuseria-maiz text-white;
+    box-shadow: 0 3px 0 0 #D4A520;
+  }
+  .btn-tab-3d-active:active {
+    box-shadow: 0 1px 0 0 #D4A520;
+    transform: translateY(2px);
+  }
+
+  /* Category toggle buttons - Minimalist */
+  .btn-category-3d {
+    @apply px-5 py-2.5 rounded-full font-medium transition-all duration-200;
+  }
+  .btn-category-3d-active {
+    @apply text-white;
+    background: #F4C430;
+    box-shadow: 0 2px 0 0 #D4A520;
+  }
+  .btn-category-3d-active:active {
+    box-shadow: 0 1px 0 0 #D4A520;
+    transform: translateY(1px);
+  }
+
+  /* Elevated Cards - Minimalist (no shadows) */
+  .card-elevated {
+    @apply bg-white rounded-xl p-6 border border-neutral-border;
+  }
+
+  /* Mesa Card Style - 3D Duolingo Style */
+  .mesa-card {
+    @apply relative rounded-xl transition-all duration-200 font-bold;
+    background: #F4C430;
+    border: 2px solid #D4A520;
+    box-shadow: 0 4px 0 0 #D4A520;
+  }
+  .mesa-card:hover {
+    background: #E5B520;
+  }
+  .mesa-card:active {
+    box-shadow: 0 2px 0 0 #D4A520;
+    transform: translateY(2px);
+  }
+
+  .mesa-card-libre {
+    @apply relative rounded-xl transition-all duration-200 font-bold;
+    background: white;
+    border: 2px solid #E6DED6;
+    box-shadow: 0 3px 0 0 #D4CBC0;
+  }
+  .mesa-card-libre:hover {
+    border-color: #F4C430;
+    box-shadow: 0 3px 0 0 #E5B520;
+  }
+  .mesa-card-libre:active {
+    box-shadow: 0 1px 0 0 #D4CBC0;
+    transform: translateY(2px);
+  }
+
+  .mesa-card-ocupada {
+    @apply relative rounded-xl transition-all duration-200 font-bold;
+    background: rgba(229, 57, 53, 0.1);
+    border: 2px solid #E53935;
+    box-shadow: 0 3px 0 0 #C12727;
+  }
+  .mesa-card-ocupada:active {
+    box-shadow: 0 1px 0 0 #C12727;
+    transform: translateY(2px);
+  }
+  .mesa-card-ocupada:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .mesa-card-ocupada:disabled:active {
+    transform: none;
+    box-shadow: 0 3px 0 0 #C12727;
+  }
+
+  /* Touch-friendly horizontal scroll for tablets/iPads */
+  .scroll-horizontal-touch {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
 }

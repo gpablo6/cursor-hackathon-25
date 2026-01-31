@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'sans-serif'],
+        'dm-sans': ['DM Sans', 'sans-serif'],
       },
       colors: {
         // Brand palette
@@ -29,6 +30,14 @@ export default {
           border: '#E6DED6',
           'disabled-bg': '#EAE3DC',
           'disabled-text': '#BEB3A8',
+        },
+        // Pupuseria color tokens
+        pupuseria: {
+          maiz: '#F4C430',
+          crema: '#FFF8EE',
+          chicharron: '#7A4A2E',
+          curtido: '#4CAF50',
+          salsa: '#E53935',
         },
       },
     },
